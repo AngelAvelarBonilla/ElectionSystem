@@ -40,12 +40,29 @@ void commandHelp() {
 	puts("");
 }
 
+void castVote(){
+    int i, k;
+    char candidateChoice;
+    for(i = 0; i<3; i++){
+        printf("Cast vote for "); getOfficerPosition(i);
+        for(k = 0; k<3; k++){
+            printf("\nCandidate %c", k+65);
+        }
+        printf("\n0 for none of them\nChoice: ");
+        scanf(" %c", &candidateChoice);
+        candidateChoice = toupper(candidateChoice);
+        if (candidateChoice != "0")
+            votes[i][candidateChoice - 65]++;
+        puts("\n----------");
+    }
+}
+
 void showResults() {
     int i, j;
     for(i = 0; i<3; i++){
         getOfficerPosition(i);
         for(j=0; j<3; j++){
-            printf("\nCandidate %d: %d votes", j+1, votes[i][j]);
+            printf("\nCandidate %c: %d votes", j+65, votes[i][j]);
         }
         puts("\n----------");
     }
@@ -74,7 +91,9 @@ int main() {
 			commandHelp();
 		} else if (command == 'r'){
 		    showResults();
-		} else if (command == 'e') {
+		} else if (command == 'v'){
+		    castVote();
+        } else if (command == 'e') {
 			puts("Have a wonderful day");
 			break;
 		}
