@@ -15,7 +15,7 @@
 #include <ctype.h>
 #include <string.h>
 
-void pollUserForInputFileName(char *fileName, int fileNameLength) {
+void pollUserForInputFileName(char fileName[], int *fileNameLength) {
 	int hasFile = 0;
 	
 	printf("Do you have a input file to supply? (1=yes, 0=no): ");
@@ -24,7 +24,7 @@ void pollUserForInputFileName(char *fileName, int fileNameLength) {
 	if (hasFile) {
 		printf("Please enter the file name (Up to 64 characters): ");
 		scanf(" %s", fileName);
-		fileNameLength = strlen(fileName);
+		(*fileNameLength) = strlen(fileName);
 	}
 }
 
@@ -38,13 +38,6 @@ void commandHelp() {
 
 int main() {
 	char command = 'h'; //Default to 'help' so we can automatically show the user the help menu
-	char fileName[65];
-	int fileNameLength = 0;
-	
-	pollUserForInputFileName(fileName, &fileNameLength);
-	for (int i = 0; i < fileNameLength; i++) {
-		printf("");
-	}
 	
 	//Main loop
 	do {
