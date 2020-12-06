@@ -16,8 +16,10 @@
 #include <string.h>
 
 int votes[3][3] = {{0}};
+char fileName[65];
+int fileNameLength = 0;
 
-void pollUserForInputFileName(char fileName[], int *fileNameLength) {
+void pollUserForInputFileName(char userInputNameOfFile[], int* userInputNameLength) {
 	int hasFile = 0;
 
 	printf("Do you have a input file to supply? (1=yes, 0=no): ");
@@ -25,8 +27,8 @@ void pollUserForInputFileName(char fileName[], int *fileNameLength) {
 
 	if (hasFile) {
 		printf("Please enter the file name (Up to 64 characters): ");
-		scanf(" %s", fileName);
-		(*fileNameLength) = strlen(fileName);
+		scanf(" %s", userInputNameOfFile);
+		(*userInputNameLength) = strlen(userInputNameOfFile);
 	}
 }
 
@@ -34,21 +36,12 @@ void commandHelp() {
 	puts("Help Menu (Format: Command - Description)");
 	puts("----------");
 	puts("h - Help Menu");
-	puts("v - Cast your vote");
+	puts("v - Cast Your Vote");
 	puts("r - Show Results");
-	puts("e - Exit Program"); //Done
+	puts("s - Save Results to File");
+	puts("i - Import Results from File");
+	puts("e - Exit Program");
 	puts("");
-}
-
-void showResults() {
-    int i, j;
-    for(i = 0; i<3; i++){
-        getOfficerPosition(i);
-        for(j=0; j<3; j++){
-            printf("\nCandidate %d: %d votes", j+1, votes[i][j]);
-        }
-        puts("\n----------");
-    }
 }
 
 void getOfficerPosition(int i){
@@ -65,8 +58,79 @@ void getOfficerPosition(int i){
     }
 }
 
+void showResults() {
+    int i, j;
+    for(i = 0; i<3; i++){
+        getOfficerPosition(i);
+        for(j=0; j<3; j++){
+            printf("\nCandidate %d: %d votes", j+1, votes[i][j]);
+        }
+        puts("\n----------");
+    }
+}
+
+void saveResults() {
+	FILE *fp;
+	fp = fopen(fileName, "w");
+	
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			fprintf(fp, "%d,%d,%d", i, j, votes[i][j]);
+			
+			//This prints a \n at the end of every line except for the last. We don't want the file to end with a newline b/c that messes up the processing when the data is read in on program startup
+			if (!(i == 2 && j == 2)) {
+				fprintf(fp, "\n");
+			}
+		}
+	}
+	
+	fclose(fp);
+}
+
+void readInResults() {
+	FILE *fp;
+	fp = fopen(fileName, "r");
+	
+	while (!feof(fp)) {
+		int position, candidate, voteCount;
+		fscanf(fp, "%d,%d,%d", &position, &candidate, &voteCount);
+		votes[position][candidate] = voteCount;
+	}
+}
+
+void attemptToImportFile() {
+	char userInputNameOfFile[65];
+	int userInputNameLength = 0;
+	
+	pollUserForInputFileName(userInputNameOfFile, &userInputNameLength);
+	if (userInputNameLength == 0) {
+		fileName[0] = 'r';
+		fileName[1] = 'e';
+		fileName[2] = 's';
+		fileName[3] = 'u';
+		fileName[4] = 'l';
+		fileName[5] = 't';
+		fileName[6] = 's';
+		fileName[7] = '.';
+		fileName[8] = 'c';
+		fileName[9] = 's';
+		fileName[10] = 'v';
+		fileName[11] = '\0';
+		
+		fileNameLength = 11;
+	} else {
+		for (int i = 0; i <= userInputNameLength; i++) {
+			fileName[i] = userInputNameOfFile[i];
+		}
+		fileNameLength = userInputNameLength;
+		
+		readInResults();
+	}
+}
+
 int main() {
 	char command = 'h'; //Default to 'help' so we can automatically show the user the help menu
+	attemptToImportFile();
 
 	//Main loop
 	do {
@@ -74,6 +138,10 @@ int main() {
 			commandHelp();
 		} else if (command == 'r'){
 		    showResults();
+		} else if (command == 's') {
+			saveResults();
+		} else if (command == 'i') {
+			attemptToImportFile();
 		} else if (command == 'e') {
 			puts("Have a wonderful day");
 			break;
