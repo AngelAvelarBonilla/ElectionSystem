@@ -107,6 +107,32 @@ void showResults() {
   }
 }
 
+void showLeadingCandidate()
+{
+    int i, j, max;
+    int result[3];
+    while (i < 3)
+    {
+        for (j = 0; j < 3; j++)
+        {
+            if (votes[i][j] > max)
+            {
+                max = votes[i][j];
+            }
+        }
+        result[i] = max;
+        max = 0;
+        i++;
+    }
+
+    for (int i = 0; i < 3; i++)
+    {
+        printOfficerPositionName(i);
+        printf(": %d votes \n", result[i]);
+    }
+    puts("\n----------");
+}
+
 void readInResults() {
   FILE *fp;
   fp = fopen(fileName, "r");
@@ -157,7 +183,9 @@ int main() {
     if (command == 'h') {
       commandHelp();
     } else if (command == 'r'){
-      showResults();
+      showResults();	    
+    } else if (command == 'l'){
+      showLeadingCandidate();
     } else if (command == 'i') {
       attemptToImportFile();
     } else if (command == 'v') {
