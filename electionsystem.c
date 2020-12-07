@@ -22,6 +22,7 @@ char positionName[TOTALPOSSIBLECAN][MAXSTRINGLENGTH];
 int voteCount[TOTALPOSSIBLECAN]; // array that contains the number of votes for each candidate
 char name[MAXSTRINGLENGTH]; // name of position to be voted on ex 'President'
 int numOfCandidates;  // number of candidates running in election
+int totalVotesCast; 
 
 //int fileNameLength = 0;
 
@@ -45,24 +46,10 @@ void commandHelp() {
   puts("c - Create Election");
   puts("v - Cast Your Vote");
   puts("r - Show Results");
+  puts("l - Show Leading Candidate");
   puts("i - Import Results from File");
   puts("e - Exit Program");
   puts("");
-}
-
-void createPosition() {
-  printf("What is the name of the position for the election? ");
-  fgets(name, MAXSTRINGLENGTH, stdin);
-  printf("How many candidates are there? ");
-  scanf("%d", &numOfCandidates);
-  getchar();
-
-  for (int i = 0; i < numOfCandidates; i++) {
-    strcpy(positionName[i], name);
-  }
-
-  createCandidate();
-
 }
 
 void createCandidate () {
@@ -72,8 +59,27 @@ void createCandidate () {
         fgets(candidateName, MAXSTRINGLENGTH, stdin);
         //printf("%s has been entered", candidateName); // test
         strcpy(candidate[i], candidateName); // inserts candidate string name into candidate array
+        strtok(candidate[i], "\n");
     }
+    puts("All candidates created. Ballot is now complete.");
 }
+
+void createPosition() {
+  printf("What is the name of the position for the election? ");
+  fgets(name, MAXSTRINGLENGTH, stdin);
+  strtok(name, "\n");
+  printf("How many candidates are there? ");
+  scanf("%d", &numOfCandidates);
+  getchar();
+
+  for (int i = 0; i < numOfCandidates; i++) {
+    strcpy(positionName[i], name);
+  }
+  createCandidate();
+
+}
+
+
 
 
 // void saveResults() {
@@ -95,36 +101,75 @@ void createCandidate () {
 // }
 
 void printBallot() {
-  puts("----------- BALLOT ----------- ");
+  printf("----------- %s BALLOT ----------- \n", name);
   for (int i = 0; i < numOfCandidates; i++) {
-    printf("%d\t%s\t%s", i, positionName[i], candidate[i] );
+    printf("%d\t%s\n", i, candidate[i] );
   }
 }
 
 void castVote(){
-  int totalVotes = 0; // counter to show how many votes have been cast
   int input;
   
   while (input != -1) {
 
         printBallot();
-        printf("\nPress the number to vote for candidate. Press -1 to complete election. -> ");
+        printf("Enter the number to vote for candidate. Enter -1 to complete election. -> ");
         scanf("%d", &input);
-        voteCount[input]++;
-        totalVotes++;
-        printf("\nCongrats you voted! \nTotal votes cast: %d", totalVotes);
-        puts("\n----------"); 
+        getchar();
+        
+        if (input != -1) {
+          voteCount[input]++;
+          totalVotesCast++;
+          printf("\nCongrats you voted! \nTotal votes cast: %d", totalVotesCast);
+        } else {
+          puts("Election Complete!");
+        }
+        
+        puts("\n-----------------------------------"); 
     }   
     
   //saveResults();
 }
 
 void showResults() {
-  puts("------- ELECTION RESULTS -------");
-  for (int i = 0; i < numOfCandidates; i++) { 
-        
-        printf("%sVotes: %d\n", candidate[i], voteCount[i]);
+  int i;
+  int max = voteCount[0];
+  int pos = 0;
+  float percentage;
+    
+  for (i = 1; i < numOfCandidates; i++) {
+    if (voteCount[i] > max) {
+      pos = i;
+      max = voteCount[i];
+    }
   }
+  percentage = (float)max / totalVotesCast * 100.0;
+  puts("------- ELECTION RESULTS -------");
+  printf("%s Candidate %s has won the election with %d votes out of the %d total votes casted. \n", name, candidate[pos], max, totalVotesCast);
+  printf("They won %0.2f percent of votes.", percentage);
+
+  puts("\n --- Complete Election Results ---");
+  for (i = 0; i < numOfCandidates; i++) { 
+        printf("%s\t\tVotes: %d\n", candidate[i], voteCount[i]);
+  }
+}
+
+void showLeadingCandidate()
+{
+    printf("\nLeading candidates for %s Election: \n", name);
+    int i;
+    int max = voteCount[0];
+    int pos = 0;
+    
+    for (i = 1; i < numOfCandidates; i++) {
+      if (voteCount[i] > max) {
+        pos = i;
+        max = voteCount[i];
+      }
+    }
+    
+    printf("%s Candidate %s is leading with %d votes. \n", name, candidate[pos], max);
+    puts("\n----------");
 }
 
 // void readInResults() {
@@ -176,11 +221,14 @@ int main() {
   do {
     if (command == 'h') {
       commandHelp();
-      } else if (command == 'c'){
-        createPosition();
+    } else if (command == 'c'){
+      createPosition();
     } else if (command == 'r'){
       showResults();
-    } else if (command == 'i') {
+    } else if (command == 'l'){
+      showLeadingCandidate();
+    }
+      else if (command == 'i') {
       //attemptToImportFile();
     } else if (command == 'v') {
       castVote();
