@@ -22,15 +22,17 @@ int voteCount[TOTALPOSSIBLECAN]; // array that contains the number of votes for 
 char positionName[MAXSTRINGLENGTH]; // name of position to be voted on ex 'President'
 int numOfCandidates;  // number of candidates running in election
 int totalVotesCast; 
-int fileNameLength = 0;
-char fileName[MAXSTRINGLENGTH];
+char fileName[MAXSTRINGLENGTH];\
+
+
+// ---- File I/O
 
 void pollUserForInputFileName(char userInputNameOfFile[], int* userInputNameLength) {
   int hasFile = 0;
 
   printf("Do you have a input file to supply? (1=yes, 0=no): ");
   scanf(" %d", &hasFile);
-  getchar(); // consumes \n from scanf
+  getchar(); // consumes newline from scanf
   if (hasFile) {
     printf("Please enter the file name (Up to 64 characters): ");
     scanf(" %s", userInputNameOfFile);
@@ -38,6 +40,72 @@ void pollUserForInputFileName(char userInputNameOfFile[], int* userInputNameLeng
     (*userInputNameLength) = strlen(userInputNameOfFile);
   }
 }
+
+void saveResults() {
+  FILE *fp;
+  fp = fopen(fileName, "w");
+  for (int i = 0; i < numOfCandidates; i++) {
+      fprintf(fp, "%s,%d,%s,%d,%d,%d", positionName, i, candidate[i], voteCount[i], totalVotesCast, numOfCandidates);
+      //This prints a \n at the end of every line except for the last. We don't want the file to end with a newline b/c that messes up the processing when the data is read in on program startup
+      if (!(i == numOfCandidates -1 )) {
+        fprintf(fp, "\n");
+      }
+  }
+  fclose(fp);
+}
+
+void readInResults() {
+  FILE *fp;
+  fp = fopen(fileName, "r");
+
+  while (!feof(fp)) {
+    int readNum, readVote, readTotal, readNumCan;
+    char readCandidate[MAXSTRINGLENGTH];
+    char readPosition[MAXSTRINGLENGTH];
+    fscanf(fp, "%[^,],%d,%[^,],%d,%d,%d", &readPosition, &readNum, &readCandidate, &readVote, &readTotal, &readNumCan);
+    strcpy(candidate[readNum], readCandidate);
+    strcpy(positionName, readPosition);
+    voteCount[readNum] = readVote;
+    totalVotesCast = readTotal;
+    numOfCandidates = readNumCan;
+  }
+  printf("Pos name: %s", positionName);
+  printf("Num can %d", numOfCandidates);
+  printf("Num totalvotes %d", totalVotesCast);
+}
+
+void attemptToImportFile() {
+  char userInputNameOfFile[MAXSTRINGLENGTH];
+  int fileNameLength;
+  int userInputNameLength = 0;
+
+  pollUserForInputFileName(userInputNameOfFile, &userInputNameLength);
+  if (userInputNameLength == 0) {
+    fileName[0] = 'r';
+    fileName[1] = 'e';
+    fileName[2] = 's';
+    fileName[3] = 'u';
+    fileName[4] = 'l';
+    fileName[5] = 't';
+    fileName[6] = 's';
+    fileName[7] = '.';
+    fileName[8] = 'c';
+    fileName[9] = 's';
+    fileName[10] = 'v';
+    fileName[11] = '\0';
+
+    fileNameLength = 11;
+  } else {
+    for (int i = 0; i <= userInputNameLength; i++) {
+      fileName[i] = userInputNameOfFile[i];
+    }
+    fileNameLength = userInputNameLength;
+
+    readInResults();
+  }
+}
+
+// ELECTION SYSTEM -----------------------------------------------------------
 
 void commandHelp() {
   puts("Help Menu (Format: Command - Description)");
@@ -74,20 +142,6 @@ void createPosition() {
   createCandidate();
 }
 
-void saveResults() {
-  FILE *fp;
-  fp = fopen(fileName, "w");
-  fprintf(fp, "%s\n", positionName);
-  for (int i = 0; i < numOfCandidates; i++) {
-      fprintf(fp, "%d,%s,%d", i, candidate[i], voteCount[i]);
-      //This prints a \n at the end of every line except for the last. We don't want the file to end with a newline b/c that messes up the processing when the data is read in on program startup
-      if (!(i == 2)) {
-        fprintf(fp, "\n");
-      }
-  }
-  fclose(fp);
-}
-
 void printBallot() {
   printf("----------- %s BALLOT ----------- \n", positionName);
   for (int i = 0; i < numOfCandidates; i++) {
@@ -112,7 +166,6 @@ void castVote(){
         }
         puts("\n----------------------------------------"); 
     }   
-    
   saveResults();
 }
 
@@ -121,7 +174,8 @@ void showResults() {
   int max = voteCount[0];
   int pos = 0;
   float percentage;
-    
+
+  // loop that determines winning candidate   
   for (i = 1; i < numOfCandidates; i++) {
     if (voteCount[i] > max) {
       pos = i;
@@ -134,6 +188,7 @@ void showResults() {
   printf("They won %0.2f percent of votes.", percentage);
 
   puts("\n --- Complete Election Results ---");
+  // loop that prints entire election results
   for (i = 0; i < numOfCandidates; i++) { 
         printf("%s\t\t\tVotes: %d\n", candidate[i], voteCount[i]);
   }
@@ -156,54 +211,8 @@ void showLeadingCandidate()
     puts("\n----------");
 }
 
-void readInResults() {
-  FILE *fp;
-  fp = fopen(fileName, "r");
-
-  while (!feof(fp)) {
-    int readNum, readVote;
-    char readCandidate[MAXSTRINGLENGTH];
-    fgets(positionName, MAXSTRINGLENGTH, fp);
-    //strtok(positionName, "\n");
-    fscanf(fp, "%d,%s,%d", &readNum, &readCandidate, &readVote);
-    strcpy(candidate[readNum], readCandidate);
-    voteCount[readNum] = readVote;
-
-  }
-}
-
-void attemptToImportFile() {
-  char userInputNameOfFile[MAXSTRINGLENGTH];
-  int userInputNameLength = 0;
-
-  pollUserForInputFileName(userInputNameOfFile, &userInputNameLength);
-  if (userInputNameLength == 0) {
-    fileName[0] = 'r';
-    fileName[1] = 'e';
-    fileName[2] = 's';
-    fileName[3] = 'u';
-    fileName[4] = 'l';
-    fileName[5] = 't';
-    fileName[6] = 's';
-    fileName[7] = '.';
-    fileName[8] = 'c';
-    fileName[9] = 's';
-    fileName[10] = 'v';
-    fileName[11] = '\0';
-
-    fileNameLength = 11;
-  } else {
-    for (int i = 0; i <= userInputNameLength; i++) {
-      fileName[i] = userInputNameOfFile[i];
-    }
-    fileNameLength = userInputNameLength;
-
-    readInResults();
-  }
-}
-
-int main() {
-  char command = 'h'; //Default to 'help' so we can automatically show the user the help menu
+void launchProgram () {
+    char command = 'h'; //Default to 'help' so we can automatically show the user the help menu
   attemptToImportFile();
 
   //Main loop
@@ -230,7 +239,9 @@ int main() {
     getchar();
     command = tolower(command);
   } while (1); //Never-ending expression in the while here because we want to break out after we process the goodbye message. This procesing happens at the beginning of the loop, not the end
+}
 
-
+int main() {
+  launchProgram();
   return 0;
 }
