@@ -25,12 +25,13 @@ int totalVotesCast;
 char fileName[MAXSTRINGLENGTH];\
 
 
-// ---- File I/O
+// ------------------------------- File I/O ------------------------------- //
 
+// Prompts user to load previous election results
 void pollUserForInputFileName(char userInputNameOfFile[], int* userInputNameLength) {
   int hasFile = 0;
 
-  printf("Do you have a input file to supply? (1=yes, 0=no): ");
+  printf("Do you have a input file to supply? (1 = yes, 0 = no): ");
   scanf(" %d", &hasFile);
   getchar(); // consumes newline from scanf
   if (hasFile) {
@@ -41,12 +42,16 @@ void pollUserForInputFileName(char userInputNameOfFile[], int* userInputNameLeng
   }
 }
 
+// Write results of election to results.csv
+// Information written to csv:
+// Name of Position, ARRAY INDEX, Name of Candidate, Candidates Vote Count, Total Votes Casted, Total Num of Candidates
 void saveResults() {
   FILE *fp;
   fp = fopen(fileName, "w");
   for (int i = 0; i < numOfCandidates; i++) {
       fprintf(fp, "%s,%d,%s,%d,%d,%d", positionName, i, candidate[i], voteCount[i], totalVotesCast, numOfCandidates);
-      //This prints a \n at the end of every line except for the last. We don't want the file to end with a newline b/c that messes up the processing when the data is read in on program startup
+      //This prints a \n at the end of every line except for the last. 
+      //We don't want the file to end with a newline b/c that messes up the processing when the data is read in on program startup
       if (!(i == numOfCandidates -1 )) {
         fprintf(fp, "\n");
       }
@@ -54,6 +59,7 @@ void saveResults() {
   fclose(fp);
 }
 
+// Loads results from previous election, can continue election or view results.
 void readInResults() {
   FILE *fp;
   fp = fopen(fileName, "r");
@@ -69,9 +75,6 @@ void readInResults() {
     totalVotesCast = readTotal;
     numOfCandidates = readNumCan;
   }
-  printf("Pos name: %s", positionName);
-  printf("Num can %d", numOfCandidates);
-  printf("Num totalvotes %d", totalVotesCast);
 }
 
 void attemptToImportFile() {
@@ -100,13 +103,13 @@ void attemptToImportFile() {
       fileName[i] = userInputNameOfFile[i];
     }
     fileNameLength = userInputNameLength;
-
     readInResults();
   }
 }
 
-// ELECTION SYSTEM -----------------------------------------------------------
+// --------------------------- ELECTION SYSTEM --------------------------- //
 
+// Print menu screen
 void commandHelp() {
   puts("Help Menu (Format: Command - Description)");
   puts("----------");
@@ -120,22 +123,24 @@ void commandHelp() {
   puts("");
 }
 
+// Creates candidate string to be named. 
 void createCandidate () {
     char candidateName[MAXSTRINGLENGTH]; 
     for (int i = 0; i < numOfCandidates; i++) { 
         printf("Please enter candidate name: "); 
         fgets(candidateName, MAXSTRINGLENGTH, stdin);
-        strtok(candidateName, "\n");                  // eliminates \n buffer
+        strtok(candidateName, "\n");                  // eliminates newline buffer
         printf("Candidate %s has been entered on the ballot.\n", candidateName); 
         strcpy(candidate[i], candidateName); // inserts candidate string name into candidate array
     }
     puts("All candidates created. Ballot is now complete.");
 }
 
+// Creates position string to be voted on and how many total candidates there will be.
 void createPosition() {
   printf("What is the name of the position for the election? ");
   fgets(positionName, MAXSTRINGLENGTH, stdin);
-  strtok(positionName, "\n");
+  strtok(positionName, "\n");                       // eliminates newline buffer
   printf("How many candidates are there? (min 2, max %d): ", TOTALPOSSIBLECAN);
   scanf("%d", &numOfCandidates);
   getchar();
@@ -149,6 +154,8 @@ void printBallot() {
   }
 }
 
+// User to input number to vote for corresponding candidate. 
+// Keeps track of total votes cast and saves results to results.csv after -1.
 void castVote(){
   int input;
   while (input != -1) {
@@ -169,16 +176,17 @@ void castVote(){
   saveResults();
 }
 
+// Calculates and declares winner
 void showResults() {
   int i;
-  int max = voteCount[0];
-  int pos = 0;
+  int max = voteCount[0]; // variable to keep track of who has highest vote total
+  int pos = 0;            // variable to keep track for parallel array index
   float percentage;
 
   // loop that determines winning candidate   
   for (i = 1; i < numOfCandidates; i++) {
     if (voteCount[i] > max) {
-      pos = i;
+      pos = i; 
       max = voteCount[i];
     }
   }
@@ -194,13 +202,14 @@ void showResults() {
   }
 }
 
+// Prints leading candidate of election so far
 void showLeadingCandidate()
 {
     printf("\nLeading candidates for %s Election: \n", positionName);
     int i;
     int max = voteCount[0];
     int pos = 0;
-    
+    // loop that determines leading canidate in race so far (same as above)
     for (i = 1; i < numOfCandidates; i++) {
       if (voteCount[i] > max) {
         pos = i;
