@@ -206,52 +206,36 @@ void castVote(){
 
 //PRE: Votes are being counted
 //POST:Tied candidates are shown and 0 is returned if there were no tied candidates, 1 otherwise
-int checkForTie(){
-    int ties[(int)(ceil(numOfCandidates/2))];//at most num/2 duplicate vote counts
-    int dupIdx=0;//index of duplicate
-    int foundDuplicate; //initialized later
-    for(int i=0;i<numOfCandidates;i++)
-    {
-        for(int j=i+1;j<numOfCandidates;j++)
-        {
-            if(voteCount[i]==voteCount[j])
-            {
-                foundDuplicate= 1;
+int checkForTie(int maxVote){
+    int tieCount = -1;//starts at -1 because there is guaranteed one candidate with the max votes
+                      //so tieCount is guaranteed to be 0 at some point
+    int tiedCandidates[numOfCandidates];//array to store indexes of tied candidates
 
-                //check in the duplicates array
-                for (int k=0; k<=dupIdx; k++)
-                {
-                    if (ties[k]== voteCount[i] && !(i==0 && j==1))
-                    {
-                        foundDuplicate= 0;
-                        break;
-                    }
-                }
-                if (foundDuplicate)
-                {
-                    ties[dupIdx] = voteCount[i]; //insert the new duplicate in the duplicates array
-                    printf("%s & %s are tied with %d votes\n",candidate[i], candidate[j], voteCount[i]);
-                    dupIdx++;//increase the index
-                    break;
-                }
-            }
+    for(int i = 0; i < numOfCandidates; i++){
+        if (voteCount[i] == maxVote){
+            tieCount++;
+            tiedCandidates[tieCount] = i;//store index of tiedCandidate
         }
     }
-    if(foundDuplicate == 1)
-        return 1;
-    else
-        return 0;
 
+    if (tieCount > 0){//if we have a tie
+        puts("Tied Candidates:");
+        for(int i = 0; i <= tieCount; i++)
+            printf("%s\n",candidate[tiedCandidates[i]]);//prints tied candidates using indexes in tiedCandidates[]
+        return 1;
+    }
+    return 0;
 }
+
 // Calculates and declares winner
+//PRE: user selects 'r'
+//POST: If there is no tie, election results are displayed
 void showResults() {
   int i;
   int max = voteCount[0]; // variable to keep track of who has highest vote total
   int pos = 0;            // variable to keep track for parallel array index
   float percentage;
 
-  if (checkForTie() == 1)
-    return;
   // loop that determines winning candidate
   for (i = 1; i < numOfCandidates; i++) {
     if (voteCount[i] > max) {
@@ -261,8 +245,10 @@ void showResults() {
   }
   percentage = (float)max / totalVotesCast * 100.0;
   puts("------- ELECTION RESULTS -------");
+  if(checkForTie(max) == 0){
   printf("%s Candidate %s has won the election with %d votes out of the %d total votes casted. \n", positionName, candidate[pos], max, totalVotesCast);
   printf("They won %0.2f percent of votes.", percentage);
+  }
 
   puts("\n --- Complete Election Results ---");
   // loop that prints entire election results
@@ -272,19 +258,24 @@ void showResults() {
 }
 
 // Prints leading candidate of election so far
+//PRE: user selects 'l'
+//POST: If there is no tie, candidate with most votes is shown
 void showLeadingCandidate()
 {
+
     printf("\nLeading candidates for %s Election: \n", positionName);
     int i;
     int max = voteCount[0];
     int pos = 0;
-    // loop that determines leading canidate in race so far (same as above)
+    // loop that determines leading candidate in race so far (same as above)
     for (i = 1; i < numOfCandidates; i++) {
       if (voteCount[i] > max) {
         pos = i;
         max = voteCount[i];
       }
     }
+    if (checkForTie(max) == 1)
+        return;
     printf("%s Candidate %s is leading with %d votes. \n", positionName, candidate[pos], max);
     puts("\n----------");
 }
