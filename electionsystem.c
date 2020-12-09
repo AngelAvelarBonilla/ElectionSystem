@@ -80,7 +80,7 @@ void readInResults() {
     char readCandidate[MAXSTRINGLENGTH];
     char readPosition[MAXSTRINGLENGTH];
 
-    fscanf(fp, "%[^,],%d,%[^,],%d,%d,%d", &readPosition, &readNum, &readCandidate, &readVote, &readTotal, &readNumCan);
+    fscanf(fp, "\n%[^,],%d,%[^,],%d,%d,%d", &readPosition, &readNum, &readCandidate, &readVote, &readTotal, &readNumCan);
     strcpy(candidate[readNum], readCandidate);//copies candidate that was read in over to the respective index in candidate[]
     strcpy(positionName, readPosition);//copies the position the was read in over to the position name for the election
 
