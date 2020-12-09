@@ -23,6 +23,7 @@ char positionName[MAXSTRINGLENGTH]; // name of position to be voted on ex 'Presi
 int numOfCandidates; // number of candidates running in election
 int totalVotesCast; // total number of votes cast
 char fileName[MAXSTRINGLENGTH]; // used for storing the name of the file we will be reading and writing to
+int isElectionInitialized = 0;
 
 // ------------------------------- File I/O ------------------------------- //
 
@@ -81,6 +82,7 @@ void readInResults() {
     totalVotesCast = readTotal;
     numOfCandidates = readNumCan;
   }
+  isElectionInitialized = 1;
 }
 
 //PRE: User has run the program and has selected option 'i'
@@ -150,9 +152,10 @@ void createPosition() {
   fgets(positionName, MAXSTRINGLENGTH, stdin);
   strtok(positionName, "\n"); // eliminates newline buffer
   printf("How many candidates are there? (min 2, max %d): ", TOTALPOSSIBLECAN);
-  scanf("%d", & numOfCandidates);
+  scanf("%d", &numOfCandidates);
   getchar();
   createCandidate();
+  isElectionInitialized = 1;
 }
 
 void printBallot() {
@@ -165,6 +168,11 @@ void printBallot() {
 // User to input number to vote for corresponding candidate.
 // Keeps track of total votes cast and saves results to results.csv after -1.
 void castVote() {
+  if (!isElectionInitialized) {
+    puts("You have not yet set up the election! That must be done before voting.");
+    return;
+  }
+
   int input;
   while (input != -1) {
     printBallot();
