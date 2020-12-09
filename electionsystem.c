@@ -88,6 +88,8 @@ void readInResults() {
     totalVotesCast = readTotal;
     numOfCandidates = readNumCan;
   }
+
+  fclose(fp);
   isElectionInitialized = 1;
 }
 
