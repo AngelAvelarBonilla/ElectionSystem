@@ -12,6 +12,7 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
@@ -136,6 +137,7 @@ void commandHelp() {
   puts("r - Show Results");
   puts("l - Show Leading Candidate");
   puts("i - Import Results from File");
+  puts("f - Flush (clear) console");
   puts("e - Exit Program");
   puts("");
 }
@@ -286,6 +288,12 @@ void showLeadingCandidate() {
   puts("\n----------");
 }
 
+void flushConsole() {
+  //We have to try both here because clear works on Linux systems, cls works on Windows
+  system("clear");
+  system("cls");
+}
+
 void launchProgram () {
   char command = 'h'; //Default to 'help' so we can automatically show the user the help menu
   attemptToImportFile();
@@ -307,6 +315,8 @@ void launchProgram () {
     } else if (command == 'e') {
       puts("Have a wonderful day");
       break;
+    } else if (command == 'f') {
+      flushConsole();
     } else {
       puts("Unrecognized command! Use the command 'h' to see the help menu.");
     }
