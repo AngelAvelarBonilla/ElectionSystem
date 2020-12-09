@@ -24,6 +24,7 @@ char positionName[MAXSTRINGLENGTH]; // name of position to be voted on ex 'Presi
 int numOfCandidates;  // number of candidates running in election
 int totalVotesCast;   // total number of votes cast
 char fileName[MAXSTRINGLENGTH]; // used for storing the name of the file we will be reading and writing to
+int isElectionInitialized = 0;
 
 
 // ------------------------------- File I/O ------------------------------- //
@@ -83,6 +84,7 @@ void readInResults() {
     totalVotesCast = readTotal;
     numOfCandidates = readNumCan;
   }
+     isElectionInitialized = 1;
 }
 
 //PRE: User has run the program or has selected option 'i'
@@ -161,6 +163,7 @@ void createPosition() {
   scanf("%d", &numOfCandidates);
   getchar();
   createCandidate();
+  isElectionInitialized = 1;
 }
 
 //PRE: User is casting vote
@@ -177,6 +180,11 @@ void printBallot() {
 //PRE: User has selected option 'v'
 //POST: All the votes for each candidate is stored
 void castVote(){
+   if (!isElectionInitialized) {
+    puts("You have not yet set up the election! That must be done before voting.");
+    return;
+  }
+
   int input;
   while (input != -1) {
         printBallot();//displays ballots and the indexes for each candidate
@@ -302,13 +310,15 @@ void launchProgram () {
     } else if (command == 'e') {
       puts("Have a wonderful day");
       break;
+    } else {
+      puts("Unrecognized command! Use the command 'h' to see the help menu.");
     }
 
     printf("Please enter a command: ");
     scanf("%c", &command);
     getchar();
     command = tolower(command);
-  } while (1); //Never-ending expression in the while here because we want to break out after we process the goodbye message. This procesing happens at the beginning of the loop, not the end
+  } while (1); //Always-true expression in the while here because we want to break out after we process the goodbye message. This procesing happens at the beginning of the loop, not the end
 }
 
 int main() {
