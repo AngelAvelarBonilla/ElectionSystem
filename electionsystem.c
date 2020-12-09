@@ -12,9 +12,7 @@
 //
 
 #include <stdio.h>
-
 #include <ctype.h>
-
 #include <string.h>
 
 #define TOTALPOSSIBLECAN 20 // total possible candidates in the array
@@ -250,13 +248,15 @@ void launchProgram() {
     } else if (command == 'e') {
       puts("Have a wonderful day");
       break;
+    } else {
+      puts("Unrecognized command! Use the command 'h' to see the help menu.");
     }
 
     printf("Please enter a command: ");
     scanf("%c", & command);
     getchar();
     command = tolower(command);
-  } while (1); //Never-ending expression in the while here because we want to break out after we process the goodbye message. This procesing happens at the beginning of the loop, not the end
+  } while (1); //Always-true expression in the while here because we want to break out after we process the goodbye message. This procesing happens at the beginning of the loop, not the end
 }
 
 int main() {
